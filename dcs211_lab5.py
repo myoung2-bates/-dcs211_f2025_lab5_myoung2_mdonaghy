@@ -48,6 +48,14 @@ def fetchDigit(df: pd.core.frame.DataFrame, which_row: int) -> tuple[int, np.nda
     return (digit, pixels)              # return a tuple
 
 ###################
+cleanTheData(dataframe)
+    col66name = dataframe.columns[66]  # get column name at index 66
+
+    df_clean = dataframe.drop(columns=[col66name])  # drop by name is typical, but what else is possible?
+    
+    df_clean.info()
+
+###################
 def main() -> None:
     # for read_csv, use header=0 when row 0 is a header row
     filename = 'digits.csv'
@@ -69,7 +77,6 @@ def main() -> None:
 
     #
     # OK!  Onward to knn for digits! (based on your iris work...)
-    #
 
 ###############################################################################
 # wrap the call to main inside this if so that _this_ file can be imported
