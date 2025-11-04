@@ -72,6 +72,8 @@ def main() -> None:
     print(df.head())
     print(f"{filename} : file read into a pandas dataframe...")
 
+    cleanTheData(df)
+
     num_to_draw = 5
     for i in range(num_to_draw):
         # let's grab one row of the df at random, extract/shape the digit to be
