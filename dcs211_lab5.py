@@ -64,6 +64,22 @@ def cleanTheData(dataframe):
     
     df_clean.info()
 
+    df_clean 
+
+def predictiveModel(test_data, test_features): 
+    ''' function that takes a training set and features for a given digit and returns a predicted digit
+    
+        paramters: 
+            - numpy array of training data
+            - numpy array of test features
+            
+        returns: 
+            - preditced digit        
+    '''
+
+
+
+
 ###################
 def main() -> None:
     # for read_csv, use header=0 when row 0 is a header row
@@ -71,6 +87,8 @@ def main() -> None:
     df = pd.read_csv(filename, header = 0)
     print(df.head())
     print(f"{filename} : file read into a pandas dataframe...")
+
+    df_clean = [] 
 
     cleanTheData(df)
 
@@ -88,6 +106,39 @@ def main() -> None:
 
     #
     # OK!  Onward to knn for digits! (based on your iris work...)
+
+    # convert data to numpy array 
+    final_df = df_clean.to_numpy
+    # defining features and lables for kNN 
+    X_all = final_df[:,0:64] # features (all rows, columns 0-63)
+    Y_all = final_df[:,64] # labels (all rows, column 64 only)
+
+    indices = np.random.permutation(len(Y_all)) # indices is a permutation list 
+
+    # scramble x and y with permutation 
+    X_labeled = X_all[indices]
+    Y_labeled = Y_all[indices]
+    print(X_labeled)
+    print(Y_labeled)
+
+    # train on 80%, test on 20% 
+    num_rows = X_labeled.shape[0]
+    test_percent = 0.20
+    test_size = int(test_percent*num_rows)
+
+    X_test = X_labeled[:test_size] # testing features 
+    Y_test = Y_labeled[:test_size] # testing labels 
+
+    X_train = X_labeled[test_size:] # training features 
+    Y_train = Y_labeled[test_size:] # training labels 
+
+    num_train_rows = len(Y_train)
+    num_test_rows = len(Y_test)
+    print(f"total_rows: {num_rows}; training with {num_train_rows} rows; testing with {num_test_rows} rows")
+    
+    # ready to build and test kNN model, done in predictiveModel function 
+ 
+
 
 ###############################################################################
 # wrap the call to main inside this if so that _this_ file can be imported
