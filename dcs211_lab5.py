@@ -48,7 +48,16 @@ def fetchDigit(df: pd.core.frame.DataFrame, which_row: int) -> tuple[int, np.nda
     return (digit, pixels)              # return a tuple
 
 ###################
-cleanTheData(dataframe)
+def cleanTheData(dataframe): 
+    '''function that takes a pandas dataframe and cleans it, returning a numpy array of the cleaned data
+    
+        parameters: 
+            - pandas dataframe 
+        
+        returns: 
+            - numpy array
+            
+    '''
     col66name = dataframe.columns[66]  # get column name at index 66
 
     df_clean = dataframe.drop(columns=[col66name])  # drop by name is typical, but what else is possible?
