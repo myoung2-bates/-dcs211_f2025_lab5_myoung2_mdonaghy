@@ -64,9 +64,9 @@ def cleanTheData(dataframe):
     
     df_clean.info()
 
-    df_clean 
+    return df_clean 
 
-def predictiveModel(test_data, test_features): 
+def predictiveModel(X_train_data, Y_train_data, test_features): 
     ''' function that takes a training set and features for a given digit and returns a predicted digit
     
         paramters: 
@@ -77,6 +77,15 @@ def predictiveModel(test_data, test_features):
             - preditced digit        
     '''
 
+    from sklearn.neighbors import KNeighborsClassifier
+
+    # set k in model for now 
+    k = 1 
+    knn_model = KNeighborsClassifier(n_neighbors = k)
+
+    # train model 
+    knn_model.fit(X_train_data, Y_train_data)
+    print("Created and trained a knn classifier with k = ", k)
 
 
 
@@ -90,7 +99,7 @@ def main() -> None:
 
     df_clean = [] 
 
-    cleanTheData(df)
+    df_clean = cleanTheData(df)
 
     num_to_draw = 5
     for i in range(num_to_draw):
@@ -108,7 +117,7 @@ def main() -> None:
     # OK!  Onward to knn for digits! (based on your iris work...)
 
     # convert data to numpy array 
-    final_df = df_clean.to_numpy
+    final_df = df_clean.to_numpy()
     # defining features and lables for kNN 
     X_all = final_df[:,0:64] # features (all rows, columns 0-63)
     Y_all = final_df[:,64] # labels (all rows, column 64 only)
