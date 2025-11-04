@@ -58,9 +58,9 @@ def cleanTheData(dataframe):
             - numpy array
             
     '''
-    col66name = dataframe.columns[66]  # get column name at index 66
+    col65name = dataframe.columns[65]  # get column name at index 65 
 
-    df_clean = dataframe.drop(columns=[col66name])  # drop by name is typical, but what else is possible?
+    df_clean = dataframe.drop(columns=[col65name])  # drop by name is typical, but what else is possible?
     
     df_clean.info()
 
