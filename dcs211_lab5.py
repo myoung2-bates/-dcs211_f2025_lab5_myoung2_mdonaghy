@@ -66,7 +66,7 @@ def cleanTheData(dataframe):
 
     return df_clean 
 
-def predictiveModel(X_train_data, Y_train_data, test_features): 
+def predictiveModel(train_set, features) -> int:
     ''' function that takes a training set and features for a given digit and returns a predicted digit
     
         paramters: 
@@ -77,17 +77,78 @@ def predictiveModel(X_train_data, Y_train_data, test_features):
             - preditced digit        
     '''
 
-    from sklearn.neighbors import KNeighborsClassifier
+    test_features = np.asarray(features) # make numpy array of test features 
 
-    # set k in model for now 
-    k = 1 
-    knn_model = KNeighborsClassifier(n_neighbors = k)
+    # using Euclidean distance to find one closest digit 
+    dist = np.linalg.norm 
 
-    # train model 
-    knn_model.fit(X_train_data, Y_train_data)
-    print("Created and trained a knn classifier with k = ", k)
+    num_rows, num_cols = train_set.shape  # data size
 
+    closest_digit   = train_set[0]
+    closest_features = train_set[0,0:64] # feautures include everything but last column (labels)
+    closest_distance = dist(test_features - closest_features)
 
+    for i in range(1, num_rows):
+        current_features = train_set[i, 0:64] 
+        current_distance = dist(test_features - current_features)
+
+        if current_distance < closest_distance:
+            closest_distance = current_distance  # remember closest!
+            closest_digit   = train_set[i]
+
+    # done with comparison, now have best prediction 
+    predicted_digit = int(closest_digit[-1])  
+    return predicted_digit
+    
+def splitData(all_data: np.ndarray) -> list: 
+    ''' 
+    function that accepts a numpy array full data set and creates training and testing data sets
+    parameters: 
+     - all_data: numpy array of full dataset
+
+    returns: 
+     - list of: X_test, y_test, X_train, y_train  
+     '''
+     # defining features and lables for kNN 
+    X_all = all_data[:,:-1] # features (all rows, columns 0-second to last)
+    y_all = all_data[:,-1] # labels (all rows, last column only)
+
+    indices = np.random.permutation(len(y_all)) # indices is a permutation list 
+
+    # scramble x and y with permutation 
+    X_labeled = X_all[indices]
+    y_labeled = y_all[indices]
+
+    # train on 80%, test on 20% 
+    num_rows = X_labeled.shape[0]
+    test_percent = 0.20
+    test_size = int(test_percent*num_rows)
+
+    X_test = X_labeled[:test_size] # testing features 
+    y_test = y_labeled[:test_size] # testing labels 
+
+    X_train = X_labeled[test_size:] # training features 
+    y_train = y_labeled[test_size:] # training labels 
+
+    return [X_test, y_test, X_train, y_train] 
+
+# compare labels function code from tutorial 
+def compareLabels(predicted_labels: np.ndarray, actual_labels: np.ndarray) -> int:
+    ''' a more neatly formatted comparison, returning the number correct '''
+    num_labels = len(predicted_labels)
+    num_correct = 0
+
+    for i in range(num_labels):
+        predicted = int(round(predicted_labels[i]))  # round-to-int protects from float imprecision
+        actual    = int(round(actual_labels[i]))
+        result = "incorrect"
+        if predicted == actual:  # if they match,
+            result = ""       # no longer incorrect
+            num_correct += 1  # and we count a match!
+
+    print()
+    print(f"Correct: {num_correct} out of {num_labels}")
+    return num_correct
 
 ###################
 def main() -> None:
@@ -144,8 +205,102 @@ def main() -> None:
     num_train_rows = len(Y_train)
     num_test_rows = len(Y_test)
     print(f"total_rows: {num_rows}; training with {num_train_rows} rows; testing with {num_test_rows} rows")
+
+    # numpy arrays of training and testing data 
+    train_set = np.column_stack((X_train, Y_train)) # 80% 
+    test_set = np.column_stack((X_test, Y_test)) # 20% 
+ 
+    # importing progress bar capability 
+    from tqdm import tqdm 
+
+    # test first predicitveModel 
+    predictions = []
+    correct = 0 
+
+    for i in tqdm(range(len(X_test)), desc="Predicting"): # added progress bar
+        test_features = X_test[i]               # one row of features (no label)
+        predicted_label = predictiveModel(train_set, test_features)
+        true_label = Y_test[i] 
+
+        predictions.append(predicted_label)
+
+        if predicted_label == true_label: 
+            correct += 1 
+
+    print(predictions)
+
+    accuracy = correct / len(Y_test)
+    print(f"Accuracy: {accuracy:.3f}")
     
-    # ready to build and test kNN model, done in predictiveModel function 
+    # now training with 20% and testing with 80% 
+    num_rows = X_labeled.shape[0]
+    test_percent = 0.80
+    test_size = int(test_percent*num_rows)
+
+    X_test = X_labeled[:test_size] # testing features 
+    Y_test = Y_labeled[:test_size] # testing labels 
+
+    X_train = X_labeled[test_size:] # training features 
+    Y_train = Y_labeled[test_size:] # training labels 
+
+    num_train_rows = len(Y_train)
+    num_test_rows = len(Y_test)
+    print(f"total_rows: {num_rows}; training with {num_train_rows} rows; testing with {num_test_rows} rows")
+
+    # numpy arrays of training and testing data 
+    train_set = np.column_stack((X_train, Y_train)) # 80% 
+    test_set = np.column_stack((X_test, Y_test)) # 20% 
+ 
+ # second test predicitveModel 
+    predictions = []
+    correct = 0 
+    incorrect = []
+
+    for i in tqdm(range(len(X_test)), desc="Predicting"): # added progress bar
+        test_features = X_test[i]               # one row of features (no label)
+        predicted_label = predictiveModel(train_set, test_features)
+        true_label = Y_test[i] 
+
+        predictions.append(predicted_label)
+
+        if predicted_label == true_label: 
+            correct += 1 
+
+        else: 
+            # store wrong predictions 
+            incorrect.append((i, true_label, predicted_label))
+
+    print(predictions)
+
+    accuracy = correct / len(Y_test)
+    print(f"Accuracy: {accuracy:.3f}")
+
+    # heat mapping wrong predictions 
+    incorrect_map = incorrect[:5]
+    for test_index, actual, predicted in incorrect_map: 
+        original_index = indices[test_index] # test row location in original df 
+        digit, pixels = fetchDigit(df_clean, original_index)
+        drawDigitHeatmap(pixels)
+        plt.show()
+
+    # calling splitData function with original numpy full dataset 
+    X_test, y_test, X_train, y_train = splitData(final_df)
+
+    # running k-NN classifier using guessed value of k 
+    from sklearn.neighbors import KNeighborsClassifier
+
+    k = 60 # guess 
+    knn_model = KNeighborsClassifier(n_neighbors = k) # k is set to 60 
+
+    # train the model with this k 
+    knn_model.fit(X_train, y_train) 
+
+    # testing this model 
+    predicted_labels = knn_model.predict(X_test) 
+    actual_labels = y_test
+
+    # printing results of this test 
+    compareLabels(predicted_labels, actual_labels)
  
 
 
