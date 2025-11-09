@@ -150,6 +150,62 @@ def compareLabels(predicted_labels: np.ndarray, actual_labels: np.ndarray) -> in
     print(f"Correct: {num_correct} out of {num_labels}")
     return num_correct
 
+def findBestK (X_train, y_train) -> int:
+    from sklearn.model_selection import train_test_split
+    from sklearn.neighbors import KNeighborsClassifier
+    '''
+    A function that determines the best value of k for kNN by testing multiple random seeds
+    parameters: 
+    - X_train: numpy array of training features
+    - y_train: numpy array of training labels
+
+    Returns: 
+    -best_k: integer of k that has highest average accuracy
+
+    '''
+    seeds = [8675309, 5551212, 6767676]
+    k_values = [2, 4. 6, 8, 10, 12, 14] #try even k's from 1-15
+    all_scores = []
+
+    for seed in seeds:
+        random.seed(seed)
+        np.random.seed(seed)
+        
+        #spilt into 20% for validation and 80% for training
+        X_train, X_validate, y_train, y_validate = train_test_split(X_train, y_train, test_size=0.2, random_state=seed)
+
+        for k in k_values: 
+            model = KNeighborsClassifier(n_neighbors=k)
+            model.fit(X_train, y_train)
+            acc = model.score(X_validate, y_validate)
+            all_scores.append((seed, k, acc))
+    
+    #find best avg accuracy for each k
+    average_scores = {}
+    for result in all_scores: 
+        seed, k, accuracy = result
+
+    # If this k value hasn’t been seen yet, start a new list for it
+        if k not in average_scores:
+            average_scores[k] = [accuracy]
+        else:
+        # If we already have this k, add another accuracy score to its list
+            average_scores[k].append(accuracy)
+
+# Now compute the average accuracy for each k value
+    best_k = None
+    best_avg = 0
+
+    for k in average_scores:
+        avg_accuracy = np.mean(average_scores[k])
+
+    # Check if this k is better than what we’ve seen before
+    if avg_accuracy > best_avg:
+        best_avg = avg_accuracy
+        best_k = k
+    return best_k
+    
+
 ###################
 def main() -> None:
     # for read_csv, use header=0 when row 0 is a header row
