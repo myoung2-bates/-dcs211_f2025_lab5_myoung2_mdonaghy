@@ -150,7 +150,7 @@ def compareLabels(predicted_labels: np.ndarray, actual_labels: np.ndarray) -> in
     print(f"Correct: {num_correct} out of {num_labels}")
     return num_correct
 
-def findBestK (X_train, y_train) -> int:
+def findBestK (X_train, y_train, X_test, y_test) -> int:
     from sklearn.model_selection import train_test_split
     from sklearn.neighbors import KNeighborsClassifier
     '''
@@ -164,7 +164,7 @@ def findBestK (X_train, y_train) -> int:
 
     '''
     seeds = [8675309, 5551212, 6767676]
-    k_values = [2, 4. 6, 8, 10, 12, 14] #try even k's from 1-15
+    k_values = [2, 4, 6, 8, 10, 12, 14] #try even k's from 1-15
     all_scores = []
 
     for seed in seeds:
@@ -204,7 +204,37 @@ def findBestK (X_train, y_train) -> int:
         best_avg = avg_accuracy
         best_k = k
     return best_k
-    
+
+def trainAndTest(X_train, y_train, X_test, y_test, best_k):
+    from sklearn.neighbors import KNeighborsClassifier
+    '''
+    Train and test a kNN model using the best determined value of k.
+    Parameters:
+    - X_train (array-like): Training feature data
+    - y_train (array-like): Training labels
+    - X_test (array-like): Testing feature data
+    - y_test (array-like): True labels for the test set
+    - best_k (int): Best k value determined from prior experiments
+
+    Returns:
+        predicted_labels (ndarray): Labels predicted by the trained model
+    """
+    '''
+    knn_model = KNeighborsClassifier(n_neighbors=best_k)
+    knn_model.fit(X_train, y_train)
+
+    #Test the model
+    predicted_labels = knn_model.predict(X_test)
+
+    # Compute accuracy
+    accuracy = np.mean(predicted_labels == y_test)
+    print(f"Model trained and tested with k = {best_k}")
+    print(f"Prediction accuracy: {accuracy}")
+
+    #Compare predicted vs actual labels
+    compareLabels(y_test, predicted_labels)
+
+    return predicted_labels
 
 ###################
 def main() -> None:
@@ -357,8 +387,12 @@ def main() -> None:
 
     # printing results of this test 
     compareLabels(predicted_labels, actual_labels)
- 
 
+    #Find the best k value
+    best_k = findBestK(X_train, y_train, X_test, y_test)
+
+    #Train and test using that best k
+    predicted_labels = trainAndTest(X_train, y_train, X_test, y_test, best_k)
 
 ###############################################################################
 # wrap the call to main inside this if so that _this_ file can be imported
